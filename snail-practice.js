@@ -1,9 +1,12 @@
 function snail(array) {
   const length = array.length;
-  let center = Math.ceil(length / 2);
-  if (length % 2 == 0) {
-    center += 1;
-  }
+
+  let rotationCount = 0;
+
+  let right = true;
+  let bottom = false;
+  let left = false;
+  let top = false;
 
   let queue = [];
 
@@ -15,11 +18,12 @@ function snail(array) {
       fakeRow.push(0);
     }
     for (let i = 0; i < length; i++) {
-      fakeMatrix.push(fakeRow);
+      fakeMatrix.push([...fakeRow]);
     }
   }
 
   function queuePush(x, y) {
+    console.log("Push");
     queue.push(array[y][x]);
   }
 
@@ -30,46 +34,99 @@ function snail(array) {
     let y = 0;
 
     for (let i = 0; i < length * length; i++) {
-      queuePush(x, y);
-      fakeMatrix[y].splice(x, 1, -1);
+      fakeMatrix[y][x] = -1;
       console.log(x, y);
-      if (fakeMatrix[y] !== undefined) {
-        if (y < 1) {
+      console.log(fakeMatrix);
+
+      console.log(`${rotationCount} RotationCount`);
+
+      function turnRight() {
+        console.log("Turning");
+        rotationCount++;
+        i--
+        if (right === true) {
+          bottom = true;
+          right = false;
+          console.log("Bottom");
+        } else if (bottom === true) {
+          left = true;
+          bottom = false;
+          console.log("left");
+        } else if (left === true) {
+          top = true;
+          left = false;
+          console.log("Top");
+        } else if (top === true) {
+          right = true;
+          top = false;
+          console.log("Right");
+        }
+      }
+
+      function moveForward() {
+        if (right === true) {
           x++;
-        }
-      }
-      if (fakeMatrix[y][x] === undefined || x <= length) {
-        y++;
-        if (fakeMatrix[y][x] === undefined) {
+        } else if (bottom === true) {
+          y++;
+        } else if (left === true) {
           x--;
+        } else if (top === true) {
+          y--;
+        }
+        rotationCount = 0;
+      }
+
+      if (rotationCount === 4) {
+        queuePush(x, y);
+        break;
+      }
+      if (right === true) {
+        if (fakeMatrix[y]?.[x + 1] === 0) {
+          queuePush(x, y);
+          moveForward();
+        } else {
+          turnRight();
+        }
+      } else if (bottom === true) {
+        if (fakeMatrix[y + 1]?.[x] === 0) {
+          queuePush(x, y);
+          moveForward();
+        } else {
+          turnRight();
+        }
+      } else if (left === true) {
+        if (fakeMatrix[y]?.[x - 1] === 0) {
+          queuePush(x, y);
+          moveForward();
+        } else {
+          turnRight();
+        }
+      } else if (top === true) {
+        if (fakeMatrix[y - 1]?.[x] === 0) {
+          queuePush(x, y);
+          moveForward();
+        } else {
+          turnRight();
         }
       }
-      //   if (y === undefined) {
-      //     y--;
-      //   }
-      //   if (y <= length && y >= 1) {
-      //     y++;
-      //   }
-      //   if (x >= 0 && y === length) {
-      //     x--;
-      //   }
-      //   if (y <= length && x === 0) {
-      //     y--;
-      //     if (fakeMatrix[y][x] !== 0) {
-      //       y++;
-      //       x++;
-      //     }
-      //   }
     }
   }
-  iterateMatrix(fakeMatrix);
-  console.log(...fakeMatrix);
-  console.log(queue);
-  return queue;
+  if (array.length > 1) {
+    iterateMatrix(fakeMatrix);
+    console.log(queue);
+    return queue;
+  } else {
+    return array[0];
+  }
 }
 
-snail([
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9],
-]);
+console.log(
+  snail([
+    [1, 2, 3, 4, 5, 6],
+    [20, 21, 22, 23, 24, 7],
+    [19, 32, 33, 34, 25, 8],
+    [18, 31, 36, 35, 26, 9],
+    [17, 30, 29, 28, 27, 10],
+    [16, 15, 14, 13, 12, 11],
+  ])
+);
